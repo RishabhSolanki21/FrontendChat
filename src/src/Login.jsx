@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const BASE_URL = "http://localhost:8080"
+const BASE_URL = `${window.location.protocol}//${window.location.hostname}:8080`
 
 export default function Login() {
   const [username, setUsername] = useState("")
@@ -24,24 +24,26 @@ export default function Login() {
       const response = await fetch(`${BASE_URL}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
+        'ngrok-skip-browser-warning': 'true'
       })
 
       if (response.ok) {
         const token = await response.text()
         
         // Clear any old token
-        localStorage.clear()
+        sessionStorage.clear()
         
         // Save new token
-        localStorage.setItem('jwt', token)  // ✅ Changed 'token' to 'jwt'
+        sessionStorage.setItem('jwt', token)  // Changed 'token' to 'jwt'
 
         // Extract username from JWT
+        console.log("Received token:", token)
         const tokenPayload = JSON.parse(atob(token.split('.')[1]))
         const extractedUsername = tokenPayload.username || tokenPayload.sub
 
-       // ✅ SAVE USERNAME TO LOCALSTORAGE
-       localStorage.setItem('username', extractedUsername)
+       // SAVE USERNAME TO LOCALSTORAGE
+       sessionStorage.setItem('username', extractedUsername)
 
        console.log("Logged in as:", extractedUsername)
 

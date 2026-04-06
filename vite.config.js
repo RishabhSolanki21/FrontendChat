@@ -5,6 +5,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
    define: {
-    global: 'window',   // 👈 This fixes SockJS “global is not defined”
+    global: 'window',   // This fixes SockJS “global is not defined”
   },
+  server: {
+    host: true,            
+    allowedHosts: true,        
+    port: 5173
+  }
 })

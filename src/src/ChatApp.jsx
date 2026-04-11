@@ -47,16 +47,19 @@ export default function ChatApp() {
         'Authorization':`Bearer ${token}`,
       },
     })
-    
     const data=await response.json();
     if (!response.ok) {
       console.log("Backend error:", data.message);
       alert(data.message);
       return;
     }
-    setUserchat(data);
-    data.map(d => {
-  console.log("Friend:", d);
+     const fixedData = data.map(chats=>({
+      ...chats,
+      MessageList:[...chats.MessageList].reverse()
+     }))
+    setUserchat(fixedData);
+    fixedData.forEach(d => {
+      console.log("Friend:", d);
     });
     console.log("friends list----==>")
     })();
@@ -203,7 +206,7 @@ export default function ChatApp() {
   
   
   const sendPrivateMessage =(privateRecipient,privateMessage) => {
-    console.log("jai baba ki",privateMessage, privateRecipient)
+    console.log("====>",privateMessage, privateRecipient)
     if (!privateMessage.trim() || !privateRecipient.trim()) {
       alert('Please enter recipient and message');
       return;
@@ -253,7 +256,7 @@ export default function ChatApp() {
   );
       console.log("=============>",privateMessages)
       setPrivateMessage('');
-    }
+}
   };
 
   const sendGroupMessage = () => {
@@ -340,6 +343,7 @@ export default function ChatApp() {
         username={username}
         sendMessage={sendPrivateMessage}
         messagesEndRef={messagesEndRef}
+        setUserchat={setUserchat}
         />
     }
   }

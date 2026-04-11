@@ -4,11 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import "./FriendsList.css";
 
 export default function FriendsList({
-  setPrivateMessage,
   userchat,
   username,
   sendMessage,
-  setPrivateRecipient,
+  setUserchat
 }) {
   const messagesEndRef = useRef(null);
   const [messageText, setMessageText] = useState("");
@@ -43,6 +42,58 @@ export default function FriendsList({
       handleSendMessage();
     }
   };
+
+  const messagesContainerRef = useRef(null);
+const [hasMore, setHasMore] = useState(true);
+const [loading, setLoading] = useState(false);
+
+const handleScroll = () => {
+  const container = messagesContainerRef.current;
+  if (container.scrollTop === 0 && hasMore && !loading) {
+    fetchMoreMessages();
+  }
+};
+
+const fetchMoreMessages = async () => {
+  setLoading(true);
+  
+  const cursor = selectedFriend.MessageList[0].messageId;
+  const token=sessionStorage.getItem('jwt')
+  console.log("Fetching more messages with cursor:", cursor, "for chatId:", selectedFriend.chatId);
+  const response=await fetch(`http://localhost:8080/af?chatId=${selectedFriend.chatId}&selectedF=${selectedFriend.friends}&cursor=${cursor}&ps=10`,{
+      method:'GET',
+      headers:{
+        'Authorization':`Bearer ${token}`,
+      },
+    })
+  const data = await response.json();
+
+  if (data.length === 0) {
+    setHasMore(false);
+    return;
+  }
+  console.log(data)
+  data.forEach(m=>{
+    console.log(m)
+  })
+  const oldMessages=[...data].reverse();
+
+  const container = messagesContainerRef.current;
+  const prevScrollHeight = container.scrollHeight;
+
+  setUserchat(prev => prev.map(chat =>
+    chat.friends === selectedFriend.friends
+      ? { ...chat, MessageList: [...oldMessages, ...chat.MessageList] }
+      : chat
+  ));
+
+  // restore scroll position so it doesn't jump to top
+  requestAnimationFrame(() => {
+    container.scrollTop = container.scrollHeight - prevScrollHeight;
+  });
+
+  setLoading(false);
+};
 
   return (
     <div className="friends-container">
@@ -84,7 +135,11 @@ export default function FriendsList({
           </div>
 
           {/* Messages */}
-          <div className="messages-container">
+          <div className="messages-container"
+             ref={messagesContainerRef}
+             onScroll={handleScroll}
+            >
+            {loading && <div className="loading-top">Loading...</div>}
             {selectedFriend.MessageList && selectedFriend.MessageList.length > 0 ? (
               <>
                 {selectedFriend.MessageList.map((m, index) => {

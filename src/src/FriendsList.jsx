@@ -46,6 +46,7 @@ export default function FriendsList({
   const messagesContainerRef = useRef(null);
 const [hasMore, setHasMore] = useState(true);
 const [loading, setLoading] = useState(false);
+// const [cursor, setCursor] = useState(null);
 
 const handleScroll = () => {
   const container = messagesContainerRef.current;
@@ -55,9 +56,10 @@ const handleScroll = () => {
 };
 
 const fetchMoreMessages = async () => {
+  if(hasMore===false) return;
   setLoading(true);
-  
-  const cursor = selectedFriend.MessageList[0].messageId;
+   const cursor =selectedFriend.MessageList[0].messageId;
+
   const token=sessionStorage.getItem('jwt')
   console.log("Fetching more messages with cursor:", cursor, "for chatId:", selectedFriend.chatId);
   const response=await fetch(`http://localhost:8080/af?chatId=${selectedFriend.chatId}&selectedF=${selectedFriend.friends}&cursor=${cursor}&ps=10`,{
@@ -67,16 +69,20 @@ const fetchMoreMessages = async () => {
       },
     })
   const data = await response.json();
-
-  if (data.length === 0) {
+  console.log("Fetched messages:", data[0].hasNext ,data[0].message);
+  if (data[0].hasNext===false) {  
     setHasMore(false);
-    return;
+    //  return;
   }
-  console.log(data)
-  data.forEach(m=>{
-    console.log(m)
-  })
+  
   const oldMessages=[...data].reverse();
+  
+//   const updatedOldMessages=oldMessages.map(m=>({
+//     ...m,
+//     receivername:selectedFriend.friends,
+//     sendername:username,
+//   }))
+// console.log(updatedOldMessages);
 
   const container = messagesContainerRef.current;
   const prevScrollHeight = container.scrollHeight;

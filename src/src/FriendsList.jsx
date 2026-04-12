@@ -100,6 +100,10 @@ const fetchMoreMessages = async () => {
 
   setLoading(false);
 };
+const selectedFriendMessages=(e)=>{
+  setSelectedFriendName(e.friends);
+  setHasMore(true);
+}
 
   return (
     <div className="friends-container">
@@ -114,7 +118,7 @@ const fetchMoreMessages = async () => {
           userchat.map((user, index) => (
             <div
               key={user.username || index}
-              onClick={() => setSelectedFriendName(user.friends)}
+              onClick={() => selectedFriendMessages(user)}
               className={`friend-item ${
                 selectedFriendName === user.friends ? "active" : ""
               }`}

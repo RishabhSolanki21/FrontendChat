@@ -1,5 +1,3 @@
-
-
 import { useEffect, useRef, useState } from "react";
 import "./FriendsList.css";
 
@@ -58,7 +56,15 @@ const handleScroll = () => {
 const fetchMoreMessages = async () => {
   if(hasMore===false) return;
   setLoading(true);
-   const cursor =selectedFriend.MessageList[0].messageId;
+  let cursor = null;
+  if(selectedFriend.MessageList[0].messageId!==cursor){
+       cursor =selectedFriend.MessageList[0].messageId;
+        console.log("Cursor updated to:", cursor);
+  }
+  else{
+    console.log(selectedFriend.MessageList[0].messageId,"is same as cursor, not fetching more");
+    return;
+  }
 
   const token=sessionStorage.getItem('jwt')
   console.log("Fetching more messages with cursor:", cursor, "for chatId:", selectedFriend.chatId);

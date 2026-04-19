@@ -103,7 +103,7 @@ export default function ChatApp() {
         console.log('Connected to WebSocket as:', username);
         setIsConnected(true);
         // step 4
-        client.subscribe(`/user/${username}/private`, (message) => {
+        client.subscribe(`/user/queue/private`, (message) => {
           const received = JSON.parse(message.body);
           console.log('Received private message:', received);
           setPrivateMessages(prev => [...prev, {

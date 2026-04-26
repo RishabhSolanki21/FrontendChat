@@ -6,11 +6,12 @@ export default function FriendsList({
   username,
   sendMessage,
   setUserchat
-}) {
+}) 
+{
   const messagesEndRef = useRef(null);
   const [messageText, setMessageText] = useState("");
   const [selectedFriendName, setSelectedFriendName] = useState(null);
-
+  const baseurl=`http://localhost:8080/`
   const selectedFriend = userchat.find(
     (user) => user.friends === selectedFriendName
   );
@@ -44,6 +45,7 @@ export default function FriendsList({
   const messagesContainerRef = useRef(null);
 const [hasMore, setHasMore] = useState(true);
 const [loading, setLoading] = useState(false);
+const [files,setFiles]=useState(null);
 // const [cursor, setCursor] = useState(null);
 
 const handleScroll = () => {
@@ -52,6 +54,7 @@ const handleScroll = () => {
     fetchMoreMessages();
   }
 };
+  const token=sessionStorage.getItem('jwt')
 
 const fetchMoreMessages = async () => {
   if(hasMore===false) return;
@@ -65,10 +68,8 @@ const fetchMoreMessages = async () => {
     console.log(selectedFriend.MessageList[0].messageId,"is same as cursor, not fetching more");
     return;
   }
-
-  const token=sessionStorage.getItem('jwt')
   console.log("Fetching more messages with cursor:", cursor, "for chatId:", selectedFriend.chatId);
-  const response=await fetch(`http://localhost:8080/af?chatId=${selectedFriend.chatId}&selectedF=${selectedFriend.friends}&cursor=${cursor}&ps=10`,{
+  const response=await fetch(`${baseurl}af?chatId=${selectedFriend.chatId}&selectedF=${selectedFriend.friends}&cursor=${cursor}&ps=10`,{
       method:'GET',
       headers:{
         'Authorization':`Bearer ${token}`,
@@ -82,13 +83,6 @@ const fetchMoreMessages = async () => {
   }
   
   const oldMessages=[...data].reverse();
-  
-//   const updatedOldMessages=oldMessages.map(m=>({
-//     ...m,
-//     receivername:selectedFriend.friends,
-//     sendername:username,
-//   }))
-// console.log(updatedOldMessages);
 
   const container = messagesContainerRef.current;
   const prevScrollHeight = container.scrollHeight;
@@ -109,6 +103,34 @@ const fetchMoreMessages = async () => {
 const selectedFriendMessages=(e)=>{
   setSelectedFriendName(e.friends);
   setHasMore(true);
+}
+const formdata=new FormData();
+const postFiles=async(e)=>{
+  formdata.append("file",e.target.files[0])
+  console.log("files uploading")
+  const response=await fetch(`${baseurl}upload`,{
+    method: 'POST',
+    headers: {
+      'Authorization' :`Bearer ${token}`
+    },
+    body:formdata,
+  });
+  const data= await response.text();
+  console.log(data);
+  getFiles(data);
+
+}
+const getFiles=async(param)=>{
+  const response=await fetch(`${baseurl}getfile/${param}`,{
+    method: 'GET',
+    headers: {
+      'Authorization' :`Bearer ${token}`
+    },
+  });
+  const data=await response.blob();
+  const dataurl=URL.createObjectURL(data);
+  console.log(dataurl)
+  console.log(data)
 }
 
   return (
@@ -195,12 +217,21 @@ const selectedFriendMessages=(e)=>{
                 onChange={(e) => setMessageText(e.target.value)}
                 onKeyDown={handleKeyPress}
               />
+              <input
+                type="file"
+                id="file-input"
+                style={{ display: "none" }}
+                onChange={postFiles}
+              />
+              <label htmlFor="file-input" className="attachment-button">
+                📎
+              </label>
               <button
                 onClick={handleSendMessage}
                 className={`send-button ${
-                  messageText.trim() ? "enabled" : "disabled"
+                  messageText.trim() || files ? "enabled" : "disabled"
                 }`}
-                disabled={!messageText.trim()}
+                disabled={!messageText.trim() || !files}
               >
                 ➤
               </button>

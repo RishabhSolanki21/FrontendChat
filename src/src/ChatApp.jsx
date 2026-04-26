@@ -190,10 +190,7 @@ export default function ChatApp() {
       });
       console.log('Joined room:', roomId);
     }
-    // return () => {
-    //   GroupSubRef.current?.unsubscribe();
-    //   GroupSubRef.current = null;
-    // }
+
     }, [joinedRoom, stompClient]);
 
   const leaveRoom = () => {
@@ -212,11 +209,13 @@ export default function ChatApp() {
       return;
     }
 
+
     if (stompClient && stompClient.connected) {
       const messageObj = {
         sendername: username,
         receivername: privateRecipient,
         message: privateMessage
+        // mType:"rf"
       };
       console.log(messageObj)
       stompClient.publish({

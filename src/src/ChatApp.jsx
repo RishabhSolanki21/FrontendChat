@@ -123,7 +123,8 @@ export default function ChatApp() {
                      {
                         message: received.message,
                           sendername: received.sendername,
-                        timestamp: new Date().toISOString()
+                        timestamp: new Date().toISOString(),
+                        mType: received.mType
                         }
                         ]
                      };
@@ -201,21 +202,21 @@ export default function ChatApp() {
     setRoomId('');
   };
   
-  
-  const sendPrivateMessage =(privateRecipient,privateMessage) => {
+  const sendPrivateMessage =(privateRecipient,privateMessage,ftype="TEXT") => {
     console.log("====>",privateMessage, privateRecipient)
-    if (!privateMessage.trim() || !privateRecipient.trim()) {
+    if (!privateMessage.trim() ||( !privateRecipient.trim()&& ftype==="TEXT")) {
       alert('Please enter recipient and message');
       return;
     }
-
+    console.log("fil type set",ftype)
+    console.log("private message ",privateMessage)
 
     if (stompClient && stompClient.connected) {
       const messageObj = {
         sendername: username,
         receivername: privateRecipient,
-        message: privateMessage
-        // mType:"rf"
+        message: privateMessage,
+        mType: ftype
       };
       console.log(messageObj)
       stompClient.publish({
@@ -245,7 +246,8 @@ export default function ChatApp() {
                      {
                         message: privateMessage,
                         sendername: username,
-                        timestamp: new Date().toISOString()
+                        timestamp: new Date().toISOString(),
+                        mType: ftype
                     }
                         ]
                      };

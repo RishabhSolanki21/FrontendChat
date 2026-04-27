@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./FriendsList.css";
-
+import MessageImage from "./MessageImage";
 export default function FriendsList({
   userchat,
   username,
   sendMessage,
-  setUserchat
+  setUserchat,
 }) 
 {
   const messagesEndRef = useRef(null);
@@ -104,8 +104,8 @@ const selectedFriendMessages=(e)=>{
   setSelectedFriendName(e.friends);
   setHasMore(true);
 }
-const formdata=new FormData();
 const postFiles=async(e)=>{
+  const formdata=new FormData();
   formdata.append("file",e.target.files[0])
   console.log("files uploading")
   const response=await fetch(`${baseurl}upload`,{
@@ -115,24 +115,15 @@ const postFiles=async(e)=>{
     },
     body:formdata,
   });
-  const data= await response.text();
-  console.log(data);
-  getFiles(data);
+  const data= await response.json();
+  var type="IMAGE";
+  // if(data.fileType.start)
+  sendMessage(selectedFriendName,data.fileName,type)
+  // setMessageText(data.fileName)
 
+  console.log(data.fileName);
+  console.log(data.fileType);
 }
-const getFiles=async(param)=>{
-  const response=await fetch(`${baseurl}getfile/${param}`,{
-    method: 'GET',
-    headers: {
-      'Authorization' :`Bearer ${token}`
-    },
-  });
-  const data=await response.blob();
-  const dataurl=URL.createObjectURL(data);
-  console.log(dataurl)
-  console.log(data)
-}
-
   return (
     <div className="friends-container">
       {/* LEFT SIDE - FRIEND LIST */}
@@ -182,7 +173,8 @@ const getFiles=async(param)=>{
               <>
                 {selectedFriend.MessageList.map((m, index) => {
                   const isSentByMe = m.sendername === username;
-                  return (
+                  if(m.mType==='TEXT'){
+                    return (
                     <div
                       key={index}
                       className={`message-row ${isSentByMe ? "sent" : "received"}`}
@@ -196,6 +188,28 @@ const getFiles=async(param)=>{
                       </div>
                     </div>
                   );
+                  }
+                  else if(m.mType==='IMAGE'){
+                    return (
+                    <div
+                      key={index}
+                      className={`message-row ${isSentByMe ? "sent" : "received"}`}
+                    >
+                      <div
+                        className={`message-bubble ${
+                          isSentByMe ? "sent" : "received"
+                        }`}
+                      >
+                      <MessageImage 
+                        filename={m.message}
+                        token={token}
+                        baseurl={baseurl}
+                      />
+                      </div>
+                    </div>
+                  );
+                  }
+                  
                 })}
                 <div ref={messagesEndRef} />
               </>
@@ -231,7 +245,7 @@ const getFiles=async(param)=>{
                 className={`send-button ${
                   messageText.trim() || files ? "enabled" : "disabled"
                 }`}
-                disabled={!messageText.trim() || !files}
+                disabled={!messageText.trim() && !files}
               >
                 ➤
               </button>

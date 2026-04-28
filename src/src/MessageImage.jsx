@@ -1,6 +1,7 @@
 import React from "react";
 import { useState,useEffect } from "react";
-export default function MessageImage ({filename,token,baseurl}){
+
+export default function MessageImage ({filename,token,baseurl,type}){
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,6 +21,7 @@ export default function MessageImage ({filename,token,baseurl}){
         }
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
+        console.log("Fetched image blob and created URL:", url);
         setImageUrl(url);
         setLoading(false);
         console.log("url ",url)
@@ -47,8 +49,8 @@ export default function MessageImage ({filename,token,baseurl}){
   if (error) {
     return <div className="image-error">Failed to load image</div>;
   }
-
-  return (
+  if(type==="IMAGE"){
+    return (
     <div className="message-media">
       <img 
         src={imageUrl}
@@ -65,4 +67,28 @@ export default function MessageImage ({filename,token,baseurl}){
       </a>
     </div>
   );
+  }
+  else if(type==="FILE"){
+    return(
+      <div className="file-media">
+      <a 
+        href={imageUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="file-link"
+      >
+        📄 {filename}
+      </a>
+      <br />
+      <a 
+        href={imageUrl} 
+        download={filename}
+        className="file-download-btn"
+      >
+        ⬇️ Download
+      </a>
+    </div>
+    )
+  }
+  
 }

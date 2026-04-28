@@ -116,10 +116,14 @@ const postFiles=async(e)=>{
     body:formdata,
   });
   const data= await response.json();
-  var type="IMAGE";
-  // if(data.fileType.start)
-  sendMessage(selectedFriendName,data.fileName,type)
-  // setMessageText(data.fileName)
+  let type=null;
+  if(data.fileType.startsWith("image/")){
+    type="IMAGE";
+  }
+  if(data.fileType.startsWith("application/")){
+    type="FILE";
+  }
+  sendMessage(selectedFriendName,data.fileName,type);
 
   console.log(data.fileName);
   console.log(data.fileType);
@@ -189,7 +193,7 @@ const postFiles=async(e)=>{
                     </div>
                   );
                   }
-                  else if(m.mType==='IMAGE'){
+                  else{
                     return (
                     <div
                       key={index}
@@ -204,6 +208,7 @@ const postFiles=async(e)=>{
                         filename={m.message}
                         token={token}
                         baseurl={baseurl}
+                        type={m.mType}
                       />
                       </div>
                     </div>

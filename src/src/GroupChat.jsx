@@ -6,9 +6,14 @@ export default function GroupChat({roomId,username,
 const Send = () => <span>📤</span>;
 const Users = () => <span>👥</span>;
 const MessageCircle = () => <span>💬</span>;
+
 const handleSendMessage=()=>{
   console.log("Sending group message:", groupMessage);
   sendGroupMessage()
+}
+const keepChecking=(e)=>{
+  console.log("events changing ",e, e.clientY)
+  setGroupMessage(e.target.value)
 }
     return(<>
     <div className="chat-box">
@@ -83,6 +88,7 @@ const handleSendMessage=()=>{
                   <input
                     type="text"
                     value={groupMessage}
+                    onPointerMove={(e) => keepChecking(e)}
                     onChange={(e) => setGroupMessage(e.target.value)}
                     onKeyDown={(e) => handleKeyPress(e, sendGroupMessage)}
                     placeholder="Type a message..."

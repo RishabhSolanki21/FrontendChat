@@ -1,3 +1,4 @@
+import { UserCircle, UserCog2Icon, UsersIcon } from "lucide-react";
 
 export default function TabNavigation({
     setActiveTab,activeTab
@@ -18,7 +19,17 @@ const MessageCircle = () => <span>💬</span>;
                 Private Chat
               </div>
             </button>
-            
+           
+            <button
+              onClick={() => setActiveTab('friendlist')}
+              className={`tab-button ${activeTab === 'friendlist' ? 'active' : ''}`}
+            >
+              <div className="tab-content">
+                <UserCircle />
+                FriendList/Chats
+              </div>
+            </button>
+             
             <button
               onClick={() => setActiveTab('group')}
               className={`tab-button ${activeTab === 'group' ? 'active' : ''}`}
@@ -28,13 +39,13 @@ const MessageCircle = () => <span>💬</span>;
                 Group Chat
               </div>
             </button>
-            <button
-              onClick={() => setActiveTab('friendlist')}
-              className={`tab-button ${activeTab === 'friendlist' ? 'active' : ''}`}
+             <button
+              onClick={() => setActiveTab('collab')}
+              className={`tab-button ${activeTab === 'collab' ? 'active' : ''}`}
             >
               <div className="tab-content">
                 <Users />
-                FriendList/Chats
+                Collab & Chat
               </div>
             </button>
           </div>

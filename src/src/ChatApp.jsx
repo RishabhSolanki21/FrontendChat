@@ -8,6 +8,7 @@ import PrivateChat from './PrivateChat';
 import GroupChat from './GroupChat';
 import TabNavigation from './TabNavigation';
 import FriendsList from './FriendsList';
+import Collab from './Collab';
 
 export default function ChatApp() {
   const [username, setUsername] = useState('');
@@ -103,7 +104,7 @@ export default function ChatApp() {
         console.log('Connected to WebSocket as:', username);
         setIsConnected(true);
         // step 4
-        client.subscribe(`/user/queue/private`, (message) => {
+        client.subscribe(`/user/queue/private`,(message) => {
           const received = JSON.parse(message.body);
           console.log('Received private message:', received);
           setPrivateMessages(prev => [...prev, {
@@ -180,7 +181,7 @@ export default function ChatApp() {
 
       if (stompClient && stompClient.connected) {
       GroupSubRef.current=stompClient.subscribe(`/topic/group/${joinedRoom}`, (message) => {
-        console.log('Received group message:', message);
+        console.log('Received group mess age:', message);
         const received = JSON.parse(message.body);
         console.log('Received group message:', received);
         setGroupMessages(prev => [...prev, {
@@ -191,7 +192,6 @@ export default function ChatApp() {
       });
       console.log('Joined room:', roomId);
     }
-
     }, [joinedRoom, stompClient]);
 
   const leaveRoom = () => {
@@ -272,10 +272,7 @@ export default function ChatApp() {
         username: username,
         content: groupMessage
       };
-
       console.log('Sending group message:', messageObj);
-      // for(let i=0;i<100;i++){
-      //   setTimeout(()=>{
           stompClient.publish({
         destination: `/chat/message/${joinedRoom}`,
         body: JSON.stringify(messageObj),
@@ -285,17 +282,14 @@ export default function ChatApp() {
           'timestamp': new Date().toISOString()
         }
       });
-    // },i*50);
-    
-      // }
       setGroupMessage('');
     }
-    
   };
 
   const handleKeyPress = (e, sendFunction) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+      console.log("event ",e)
       sendFunction();
     }
   };
@@ -323,6 +317,14 @@ export default function ChatApp() {
             setPrivateRecipient={setPrivateRecipient}
             privateRecipient={privateRecipient}
           />
+      case 'friendlist':
+        return <FriendsList
+        userchat={userChat}
+        username={username}
+        sendMessage={sendPrivateMessage}
+        messagesEndRef={messagesEndRef}
+        setUserchat={setUserchat}
+        />
       case 'group':
         return <GroupChat
           username={username}
@@ -338,14 +340,9 @@ export default function ChatApp() {
           setGroupMessage={setGroupMessage}
           handleKeyPress={handleKeyPress}
           />
-      case 'friendlist':
-        return <FriendsList
-        userchat={userChat}
-        username={username}
-        sendMessage={sendPrivateMessage}
-        messagesEndRef={messagesEndRef}
-        setUserchat={setUserchat}
-        />
+      case 'collab':
+        return<Collab>
+        </Collab>
     }
   }
 

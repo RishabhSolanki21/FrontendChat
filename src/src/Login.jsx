@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+// import {jwtDecode} from "jwt-decode"
 
 const BASE_URL = `${window.location.protocol}//${window.location.hostname}:8080`
 
@@ -25,7 +26,6 @@ export default function Login() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
-        'ngrok-skip-browser-warning': 'true'
       })
 
       if (response.ok) {
@@ -40,6 +40,9 @@ export default function Login() {
         // Extract username from JWT
         console.log("Received token:", token)
         const tokenPayload = JSON.parse(atob(token.split('.')[1]))
+        // const token2=jwtDecode(token)
+        // console.log(token2)
+        console.log(tokenPayload);
         const extractedUsername = tokenPayload.username || tokenPayload.sub
 
        // SAVE USERNAME TO LOCALSTORAGE

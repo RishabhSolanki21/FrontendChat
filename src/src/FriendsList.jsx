@@ -106,6 +106,7 @@ const selectedFriendMessages=(e)=>{
 }
 const postFiles=async(e)=>{
   const formdata=new FormData();
+  console.log("e.target.files[] ",e.target.files[0])
   formdata.append("file",e.target.files[0])
   console.log("files uploading")
   const response=await fetch(`${baseurl}upload`,{

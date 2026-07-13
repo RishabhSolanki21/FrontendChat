@@ -176,22 +176,30 @@ export default function ChatApp() {
     setJoinedRoom(roomId);
     setGroupMessages([]);
   }
+  const [docs,setDocs]=useState(null);  
     useEffect(() => {
       if(!joinedRoom) return;
 
       if (stompClient && stompClient.connected) {
       GroupSubRef.current=stompClient.subscribe(`/topic/group/${joinedRoom}`, (message) => {
-        console.log('Received group mess age:', message);
+        console.log('Received group message:', message);
         const received = JSON.parse(message.body);
-        console.log('Received group message:', received);
-        setGroupMessages(prev => [...prev, {
+        console.log('Received group message1:', received);
+        if(received.type=='PROJECT'&&received.username!==username){
+          setDocs(received)
+        }
+        else if(received.type=='CHAT'){
+          setGroupMessages(prev => [...prev, {
           username: received.username,
           content: received.content,
+          type:received.type,
           timestamp: new Date()
         }]);
+      }  
       });
       console.log('Joined room:', roomId);
     }
+    return ()=>GroupSubRef.current?.unsubscribe();
     }, [joinedRoom, stompClient]);
 
   const leaveRoom = () => {
@@ -259,9 +267,8 @@ export default function ChatApp() {
       setPrivateMessage('');
 }
   };
-
-  const sendGroupMessage = () => {
-    if (!groupMessage.trim()) {
+  const sendGroupMessage = (newText) => {
+    if(newText.type=='CHAT'&&!newText.content.trim()){
       alert('Please enter a message');
       return;
     }
@@ -270,7 +277,10 @@ export default function ChatApp() {
     if (stompClient && stompClient.connected && joinedRoom) {
       const messageObj = {
         username: username,
-        content: groupMessage
+        content: newText.content,
+        type:newText.type,
+        Pos:newText.Pos,
+        roomId:joinedRoom
       };
       console.log('Sending group message:', messageObj);
           stompClient.publish({
@@ -286,14 +296,18 @@ export default function ChatApp() {
     }
   };
 
-  const handleKeyPress = (e, sendFunction) => {
+  const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       console.log("event ",e)
-      sendFunction();
+      sendGroupMessage({
+            content:e.target.value,
+            type:"CHAT",
+            username:username,
+            roomId:joinedRoom
+        })
     }
   };
-
 
   // CONNECT PAGE
   if (!isConnected) {
@@ -341,8 +355,21 @@ export default function ChatApp() {
           handleKeyPress={handleKeyPress}
           />
       case 'collab':
-        return<Collab>
-        </Collab>
+        return<Collab
+          username={username}
+          roomId={roomId}
+          setRoomId={setRoomId}
+          joinRoom={joinRoom}
+          joinedRoom={joinedRoom}
+          leaveRoom={leaveRoom}
+          groupMessages={groupMessages}
+          messagesEndRef={messagesEndRef}
+          sendGroupMessage={sendGroupMessage}
+          setGroupMessage={setGroupMessage}
+          handleKeyPress={handleKeyPress}
+          docs={docs}
+          setDocs={setDocs}
+        />
     }
   }
 

@@ -8,12 +8,13 @@ const Users = () => <span>👥</span>;
 const MessageCircle = () => <span>💬</span>;
 
 const handleSendMessage=()=>{
-  console.log("Sending group message:", groupMessage);
-  sendGroupMessage()
-}
-const keepChecking=(e)=>{
-  console.log("events changing ",e, e.clientY)
-  setGroupMessage(e.target.value)
+  console.log("Sending group message10:", groupMessage);
+  sendGroupMessage({
+    content:groupMessage,
+    type:"CHAT",
+    username:username,
+    roomId:joinedRoom
+  })
 }
     return(<>
     <div className="chat-box">
@@ -32,7 +33,7 @@ const keepChecking=(e)=>{
                     Join Room
                   </button>
                 </div>
-              ) : (
+                 ) : (
                 <div className="room-info">
                   <div className="room-details">
                     <div className="room-icon">
@@ -88,9 +89,8 @@ const keepChecking=(e)=>{
                   <input
                     type="text"
                     value={groupMessage}
-                    onPointerMove={(e) => keepChecking(e)}
                     onChange={(e) => setGroupMessage(e.target.value)}
-                    onKeyDown={(e) => handleKeyPress(e, sendGroupMessage)}
+                    onKeyDown={(e) => handleKeyPress(e)}
                     placeholder="Type a message..."
                     className="message-input"
                   />

@@ -34,7 +34,8 @@ export default function Collab({roomId,username,
             content:e.target.value,
             type:'PASS',
             Pos:caretPos.current,
-            username:username
+            username:username,
+            roomId:joinedRoom
         });
         sendGroupMessage({
             content:e.target.value,
@@ -42,36 +43,46 @@ export default function Collab({roomId,username,
             Pos:caretPos.current
         })
     }
-    const saveFile=()=>{
-        sendGroupMessage({
-            content:docs,
-            type:'PROJECT',
-            username:username,
-            roomId:joinedRoom
+    const saveFile=async()=>{
+        const token=sessionStorage.getItem("jwt")
+        console.log("json token ",docs)
+        const promise=await fetch(`http://localhost:8080/updateDocs`,{
+            method:'PUT',
+            headers:{
+                'Authorization':`Bearer ${token}`,
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify(docs),
         })
+        const message=await promise.json()
+        console.log(message)
     }
 
 
-    return (<div>
-        {!joinedRoom?(
-        <div><input type="text" placeholder="create a new document"
+    return (<div className="collab-wrapper">
+        <div className="header">{!joinedRoom?(
+        <div className="input-buttons"><input type="text" placeholder="create a new document"
         value={roomId}
         onChange={(e) => setRoomId(e.target.value)}/>
         <button onClick={joinRoom}>create</button> 
         <button onClick={joinRoom}>join</button>
         </div>):(
-        <div  className="editor-container" ref={containerRef}>
-        <textarea className="editor"
-        name="textarea" value={docs?.content ??""} id="1" ref={textarearef} onChange={(e)=>{handleProject(e)}}
-        >{docs?.content}</textarea>
-        <button onClick={saveFile}>save docs</button>
-        <div className="mirror">{(docs?.content??"").slice(0,docs?.Pos??0)}<span className="rect" ref={markerRef}id="caret">
-            </span>{(docs?.content??"").slice(docs?.Pos??0)}
-        </div>
-        {docs?.username!==username&&caret.x!==0&&caret.y!==0&&(<div className="caret1" style={{
-            left:`${caret.x}px`,
-            top:`${caret.y}px`
-        }}>|</div>)}
-        </div>)}
-    </div>)
-}
+            <button className="save-button"
+            onClick={saveFile}
+            >save</button>
+        )}</div>
+        <div>
+            {joinedRoom&&(
+                <div  className="editor-container" ref={containerRef}>
+                    <textarea className="editor"
+                    name="textarea" value={docs?.content ??""} id="1" ref={textarearef} onChange={(e)=>{handleProject(e)}}>
+                        {docs?.content}</textarea>
+                                <div className="mirror">{(docs?.content??"").slice(0,docs?.Pos??0)}<span className="rect" ref={markerRef}id="caret">
+                                    </span>{(docs?.content??"").slice(docs?.Pos??0)}
+                                    </div>
+                                    {docs?.username!==username&&caret.x!==0&&caret.y!==0&&(<div className="caret1" 
+                                    style={{left:`${caret.x}px`,top:`${caret.y}px`}}>|</div>)}
+                                    </div>)}
+                                    </div>
+                                    </div>)
+                                    }

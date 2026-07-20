@@ -203,6 +203,19 @@ export default function ChatApp() {
     }, [joinedRoom, stompClient]);
 
   const leaveRoom = () => {
+    console.log('Leaving room:', joinedRoom);
+    if (stompClient && stompClient.connected) {
+    const leaving=({
+      username: username,
+      roomId:joinedRoom,
+      state:'UNSUBSCRIBE'
+    })
+    stompClient.publish({
+      destination:'/chat/unsubscribe',
+      body:JSON.stringify(leaving),
+    })
+  }
+    console.log('leaved room:', joinedRoom);
     GroupSubRef.current?.unsubscribe();
     GroupSubRef.current = null;
     setJoinedRoom('');

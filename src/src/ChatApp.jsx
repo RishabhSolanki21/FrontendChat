@@ -177,6 +177,7 @@ export default function ChatApp() {
     setGroupMessages([]);
   }
   const [docs,setDocs]=useState(null);  
+  const [onlineUsers,setOnlineUsers]=useState(null)
     useEffect(() => {
       if(!joinedRoom) return;
 
@@ -185,7 +186,8 @@ export default function ChatApp() {
         console.log('Received group message:', message);
         const received = JSON.parse(message.body);
         console.log('Received group message1:', received);
-        if(received.type=='PROJECT'&&received.username!==username){
+        if(received.type=='PROJECT' || received.type=='PASS'&&received.username!==username){
+          console.log('checking document data ', received);
           setDocs(received)
         }
         else if(received.type=='CHAT'){
@@ -196,15 +198,21 @@ export default function ChatApp() {
           timestamp: new Date()
         }]);
       }  
+      else {
+        setOnlineUsers(received);
+      }
       });
       console.log('Joined room:', roomId);
     }
-    return ()=>GroupSubRef.current?.unsubscribe();
+    return ()=>{
+      console.log("leaving room bye bye!")
+      leaveRoom()
+     console.log("leaving room bye bye 2!")
+    };
     }, [joinedRoom, stompClient]);
 
   const leaveRoom = () => {
     console.log('Leaving room:', joinedRoom);
-    if (stompClient && stompClient.connected) {
     const leaving=({
       username: username,
       roomId:joinedRoom,
@@ -214,7 +222,6 @@ export default function ChatApp() {
       destination:'/chat/unsubscribe',
       body:JSON.stringify(leaving),
     })
-  }
     console.log('leaved room:', joinedRoom);
     GroupSubRef.current?.unsubscribe();
     GroupSubRef.current = null;
@@ -292,7 +299,8 @@ export default function ChatApp() {
         username: username,
         content: newText.content,
         type:newText.type,
-        Pos:newText.Pos,
+        PosStart:newText.PosStart,
+        PosEnd:newText.PosEnd,
         roomId:joinedRoom
       };
       console.log('Sending group message:', messageObj);
@@ -382,6 +390,8 @@ export default function ChatApp() {
           handleKeyPress={handleKeyPress}
           docs={docs}
           setDocs={setDocs}
+          setOnlineUsers={setOnlineUsers}
+          onlineUsers={onlineUsers}
         />
     }
   }

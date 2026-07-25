@@ -185,12 +185,17 @@ export default function ChatApp() {
       GroupSubRef.current=stompClient.subscribe(`/topic/group/${joinedRoom}`, (message) => {
         console.log('Received group message:', message);
         const received = JSON.parse(message.body);
-        console.log('Received group message1:', received);
-        if(received.type=='PROJECT' || received.type=='PASS'&&received.username!==username){
+        console.log('Received group message1:', received.type);
+        if(received.type==='PROJECT' || received.type==='PASS'){
           console.log('checking document data ', received);
-          setDocs(received)
+          if(received.username!==username){
+                      return setDocs(received)
+          }
+          else{
+            return;
+          }
         }
-        else if(received.type=='CHAT'){
+        if(received.type=='CHAT'){
           setGroupMessages(prev => [...prev, {
           username: received.username,
           content: received.content,
@@ -198,8 +203,12 @@ export default function ChatApp() {
           timestamp: new Date()
         }]);
       }  
-      else {
-        setOnlineUsers(received);
+      else{
+        console.log('checking document data in online users ', received);
+        // if(received.username!==username){
+          return setOnlineUsers(received);
+          // }
+        
       }
       });
       console.log('Joined room:', roomId);
@@ -299,8 +308,10 @@ export default function ChatApp() {
         username: username,
         content: newText.content,
         type:newText.type,
-        PosStart:newText.PosStart,
-        PosEnd:newText.PosEnd,
+        caret:{
+          PosStart:newText.PosStart,
+          PosEnd:newText.PosEnd,
+        },
         roomId:joinedRoom
       };
       console.log('Sending group message:', messageObj);
@@ -316,6 +327,18 @@ export default function ChatApp() {
       setGroupMessage('');
     }
   };
+  const sendCaret=(caretPos)=>{
+    console.log("sending caret position via sendCaret ",caretPos)
+    stompClient.publish({
+      destination: `/chat/caret/${joinedRoom}`,
+      body:JSON.stringify(caretPos),
+      headers: {
+          'message-type': 'caretPos',
+          'room': joinedRoom,
+          'timestamp': new Date().toISOString()
+        }
+    })
+  }
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -392,6 +415,7 @@ export default function ChatApp() {
           setDocs={setDocs}
           setOnlineUsers={setOnlineUsers}
           onlineUsers={onlineUsers}
+          sendCaret={sendCaret}
         />
     }
   }

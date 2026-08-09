@@ -8,7 +8,7 @@ const Users = () => <span>👥</span>;
 const MessageCircle = () => <span>💬</span>;
 
 const handleSendMessage=()=>{
-  console.log("Sending group message10:", groupMessage);
+  // console.log("Sending group message10:", groupMessage);
   sendGroupMessage({
     content:groupMessage,
     type:"CHAT",

@@ -65,10 +65,10 @@ const fetchMoreMessages = async () => {
         console.log("Cursor updated to:", cursor);
   }
   else{
-    console.log(selectedFriend.MessageList[0].messageId,"is same as cursor, not fetching more");
+    // console.log(selectedFriend.MessageList[0].messageId,"is same as cursor, not fetching more");
     return;
   }
-  console.log("Fetching more messages with cursor:", cursor, "for chatId:", selectedFriend.chatId);
+  // // console.log("Fetching more messages with cursor:", cursor, "for chatId:", selectedFriend.chatId);
   const response=await fetch(`${baseurl}af?chatId=${selectedFriend.chatId}&selectedF=${selectedFriend.friends}&cursor=${cursor}&ps=10`,{
       method:'GET',
       headers:{
@@ -76,7 +76,7 @@ const fetchMoreMessages = async () => {
       },
     })
   const data = await response.json();
-  console.log("Fetched messages:", data[0].hasNext ,data[0].message);
+  // console.log("Fetched messages:", data[0].hasNext ,data[0].message);
   if (data[0].hasNext===false) {  
     setHasMore(false);
     //  return;

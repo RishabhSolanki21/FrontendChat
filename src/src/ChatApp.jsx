@@ -40,7 +40,7 @@ export default function ChatApp() {
       setUsername(savedUsername);
     }
     (async()=>{
-      console.log('Getting friends list:',);
+      // console.log('Getting friends list:',);
     const token=sessionStorage.getItem('jwt')
     const response=await fetch(`http://localhost:8080/af`,{
       method:'GET',
@@ -50,7 +50,7 @@ export default function ChatApp() {
     })
     const data=await response.json();
     if (!response.ok) {
-      console.log("Backend error:", data.message);
+      // console.log("Backend error:", data.message);
       alert(data.message);
       return;
     }
@@ -60,9 +60,9 @@ export default function ChatApp() {
      }))
     setUserchat(fixedData);
     fixedData.forEach(d => {
-      console.log("Friend:", d);
+      // console.log("Friend:", d);
     });
-    console.log("friends list----==>")
+    // console.log("friends list----==>")
     })();
   }, []);
 
@@ -96,17 +96,17 @@ export default function ChatApp() {
         'Authorization': `Bearer ${token}`,
       },
       
-      debug: (str) => {
-        console.log('STOMP: ' + str);
-      },
+      // debug: (str) => {
+      //   console.log('STOMP: ' + str);
+      // },
       // step 2
       onConnect: () => {
-        console.log('Connected to WebSocket as:', username);
+        // console.log('Connected to WebSocket as:', username);
         setIsConnected(true);
         // step 4
         client.subscribe(`/user/queue/private`,(message) => {
           const received = JSON.parse(message.body);
-          console.log('Received private message:', received);
+          // console.log('Received private message:', received);
           setPrivateMessages(prev => [...prev, {
             sendername: received.sendername,
             receivername: received.receivername,
@@ -133,7 +133,7 @@ export default function ChatApp() {
                  return chats;
     }));
         });
-        console.log('Subscribed to private messages for user:', username);
+        // console.log('Subscribed to private messages for user:', username);
       },
       
       onStompError: (frame) => {
@@ -142,13 +142,13 @@ export default function ChatApp() {
       window.location.href = '/';
       return;
     }
-        console.error('STOMP error:', frame);
+        // console.error('STOMP error:', frame);
         alert('Connection error. Please try again.',frame);
         setIsConnected(false);
       },
       
       onWebSocketClose: () => {
-        console.log('WebSocket connection closed');
+        // console.log('WebSocket connection closed');
         setIsConnected(false);
       }
     });
@@ -183,16 +183,16 @@ export default function ChatApp() {
 
       if (stompClient && stompClient.connected) {
       GroupSubRef.current=stompClient.subscribe(`/topic/group/${joinedRoom}`, (message) => {
-        console.log('Received group message:', message);
+        // console.log('Received group message:', message);
         const received = JSON.parse(message.body);
-        console.log('Received group message1:', received.type);
+        // console.log('Received group message1:', received.type);
         if(received.type==='PROJECT' || received.type==='PASS'){
-          console.log('checking document data ', received);
+          // console.log('checking document data ', received);
           if(received.username!==username){
-                      return setDocs(received)
+            return setDocs(received)
           }
           else{
-            return;
+            return setdocs(prev=>({...prev,version:received.version}))
           }
         }
         if(received.type=='CHAT'){
@@ -204,24 +204,24 @@ export default function ChatApp() {
         }]);
       }  
       else{
-        console.log('checking document data in online users ', received);
+        // console.log('checking document data in online users ', received);
         // if(received.username!==username){
           return setOnlineUsers(received);
           // }
         
       }
       });
-      console.log('Joined room:', roomId);
+      // console.log('Joined room:', roomId);
     }
     return ()=>{
-      console.log("leaving room bye bye!")
+      // console.log("leaving room bye bye!")
       leaveRoom()
-     console.log("leaving room bye bye 2!")
+    //  console.log("leaving room bye bye 2!")
     };
     }, [joinedRoom, stompClient]);
 
   const leaveRoom = () => {
-    console.log('Leaving room:', joinedRoom);
+    // console.log('Leaving room:', joinedRoom);
     const leaving=({
       username: username,
       roomId:joinedRoom,
@@ -231,7 +231,7 @@ export default function ChatApp() {
       destination:'/chat/unsubscribe',
       body:JSON.stringify(leaving),
     })
-    console.log('leaved room:', joinedRoom);
+    // console.log('leaved room:', joinedRoom);
     GroupSubRef.current?.unsubscribe();
     GroupSubRef.current = null;
     setJoinedRoom('');
@@ -240,13 +240,13 @@ export default function ChatApp() {
   };
   
   const sendPrivateMessage =(privateRecipient,privateMessage,ftype="TEXT") => {
-    console.log("====>",privateMessage, privateRecipient)
+    // console.log("====>",privateMessage, privateRecipient)
     if (!privateMessage.trim() ||( !privateRecipient.trim()&& ftype==="TEXT")) {
       alert('Please enter recipient and message');
       return;
     }
-    console.log("fil type set",ftype)
-    console.log("private message ",privateMessage)
+    // console.log("fil type set",ftype)
+    // console.log("private message ",privateMessage)
 
     if (stompClient && stompClient.connected) {
       const messageObj = {
@@ -255,7 +255,7 @@ export default function ChatApp() {
         message: privateMessage,
         mType: ftype
       };
-      console.log(messageObj)
+      // console.log(messageObj)
       stompClient.publish({
         destination: '/chat/private/message',
         body: JSON.stringify(messageObj),
@@ -292,29 +292,34 @@ export default function ChatApp() {
                  return chats;
     })
   );
-      console.log("=============>",privateMessages)
+      // console.log("=============>",privateMessages)
       setPrivateMessage('');
 }
   };
-  const sendGroupMessage = (newText) => {
-    if(newText.type=='CHAT'&&!newText.content.trim()){
+
+
+  const sendGroupMessage = (Data) => {
+    if(Data.type=='CHAT'&&!Data.content.trim()){
       alert('Please enter a message');
       return;
     }
-    console.log("Sending group message:", groupMessage, "to room:", joinedRoom);
+    // console.log("Sending group message:", groupMessage, "to room:", joinedRoom);
 
     if (stompClient && stompClient.connected && joinedRoom) {
       const messageObj = {
         username: username,
-        content: newText.content,
-        type:newText.type,
+        content: Data.content,
+        type:Data.type,
         caret:{
-          PosStart:newText.PosStart,
-          PosEnd:newText.PosEnd,
+          PosStart:Data.PosStart,
+          PosEnd:Data.PosEnd,
         },
-        roomId:joinedRoom
+        changed_text:Data.changed_text1,
+        roomId:joinedRoom,
+        version:Data.version,
+        oldPos:Data.oldPos
       };
-      console.log('Sending group message:', messageObj);
+      // console.log('Sending group message:', messageObj);
           stompClient.publish({
         destination: `/chat/message/${joinedRoom}`,
         body: JSON.stringify(messageObj),
@@ -328,7 +333,7 @@ export default function ChatApp() {
     }
   };
   const sendCaret=(caretPos)=>{
-    console.log("sending caret position via sendCaret ",caretPos)
+    // console.log("sending caret position via sendCaret ",caretPos)
     stompClient.publish({
       destination: `/chat/caret/${joinedRoom}`,
       body:JSON.stringify(caretPos),
@@ -343,7 +348,7 @@ export default function ChatApp() {
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      console.log("event ",e)
+      // console.log("event ",e)
       sendGroupMessage({
             content:e.target.value,
             type:"CHAT",

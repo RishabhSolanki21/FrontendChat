@@ -38,32 +38,34 @@ export default function Collab({roomId,username,
         caretPos1.current=textarearef.current.selectionStart;
         caretPos2.current=textarearef.current.selectionEnd;
         // console.log("checking caret pos in handle project ",caretPos1.current,caretPos2.current)
-        const oldPosition=docs?.caret.PosStart
+        // const oldPosition=docs?.PosStart
         console.log("callign handle project method22 ",docs )
         const textarea=checkTextChange(docs?.content??"" ,e.target.value); 
         setDocs(prev=>({...prev,
-            content:e.target.value,
+            content:prev.content.slice(0,textarea.start)+textarea.newText+prev.content.slice(textarea.start+textarea.delete_count),
             type:'PASS',           
-            oldPosStart:oldPosition,
-            caret:{
-                PosStart:caretPos1.current,
-                PosEnd:caretPos2.current,
-            },
+            // oldPosStart:oldPosition,
+            // caret:{
+            // PosStart:caretPos1.current,
+            //     PosEnd:caretPos2.current,
+            // },
             username:username,
             roomId:joinedRoom,
-            version:docs?.version,
         }));
         
         console.log("textarea ",textarea)
         sendGroupMessage({
             type:'PASS',
-            PosStart:caretPos1.current,
-            PosEnd:caretPos2.current,
+            // PosStart:caretPos1.current,
+            // PosEnd:caretPos2.current,
             version:docs?.version,  
-            oldPos:oldPosition,
-            changed_text1:textarea
+            // oldPos:oldPosition,
+            changed_text1:textarea.newText,
+            deletecount:textarea.delete_count,
+            start:textarea.start,
+            version:docs?.version,
         })
-        console.log("old caret position  ", oldPosition,docs?.caret.PosStart, caretPos1.current, caretPos2.current)
+        console.log("old caret position  ", caretPos1.current, caretPos2.current)
         console.log("setdocs ", docs??"null")
     }
     function checkTextChange(oldText,newText1){

@@ -123,7 +123,7 @@ export default function ChatApp() {
                       ...chats.MessageList,
                      {
                         message: received.message,
-                          sendername: received.sendername,
+                        sendername: received.sendername,
                         timestamp: new Date().toISOString(),
                         mType: received.mType
                         }
@@ -176,7 +176,10 @@ export default function ChatApp() {
     setJoinedRoom(roomId);
     setGroupMessages([]);
   }
-  const [docs,setDocs]=useState(null);  
+  const [docs,setDocs]=useState({
+    content:"",
+    version:0,
+  });  
   const [onlineUsers,setOnlineUsers]=useState(null)
     useEffect(() => {
       if(!joinedRoom) return;
@@ -185,20 +188,28 @@ export default function ChatApp() {
       GroupSubRef.current=stompClient.subscribe(`/topic/group/${joinedRoom}`, (message) => {
         // console.log('Received group message:', message);
         const received = JSON.parse(message.body);
+        // console.log('checking document data ', received);
         // console.log('Received group message1:', received.type);
         if(received.type==='PROJECT' || received.type==='PASS'){
-          // console.log('checking document data ', received);
+          console.log('checking document data 55', received);
           if(received.username!==username){
-            return setDocs(received)
+            return setDocs(prev=>({...prev,
+              content:prev.content.slice(0,received.payload.start)+received.payload.newText+prev.content.slice(received.payload.start+received.payload.delete_count),
+              type:received.type,
+              username:received.username,
+              roomId:received.roomId,
+              version:received.payload.version,
+            }))
           }
           else{
-            return setdocs(prev=>({...prev,version:received.version}))
+            return setDocs(prev=>({...prev,version1:received.payload.version}))
           }
+          console.log('checking document data2 ', docs);
         }
         if(received.type=='CHAT'){
           setGroupMessages(prev => [...prev, {
           username: received.username,
-          content: received.content,
+          content: received.payload.content,
           type:received.type,
           timestamp: new Date()
         }]);
@@ -306,19 +317,30 @@ export default function ChatApp() {
     // console.log("Sending group message:", groupMessage, "to room:", joinedRoom);
 
     if (stompClient && stompClient.connected && joinedRoom) {
-      const messageObj = {
+      let messageObj = {};
+      if(Data.type=='PASS'){
+        messageObj = {
         username: username,
-        content: Data.content,
         type:Data.type,
-        caret:{
-          PosStart:Data.PosStart,
-          PosEnd:Data.PosEnd,
-        },
-        changed_text:Data.changed_text1,
         roomId:joinedRoom,
-        version:Data.version,
-        oldPos:Data.oldPos
+        payload:{
+          newText:Data.changed_text1,
+          start:Data.start,
+          delete_count:Data.deletecount,
+          version:Data.version,
+        },  
       };
+    }
+    else if(Data.type=='CHAT'){
+       messageObj = {
+        username: username,
+        type:Data.type,
+        roomId:joinedRoom,
+        payload:{
+          content:Data.content,
+        },
+      };
+    }
       // console.log('Sending group message:', messageObj);
           stompClient.publish({
         destination: `/chat/message/${joinedRoom}`,

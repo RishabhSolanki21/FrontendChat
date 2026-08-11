@@ -204,7 +204,7 @@ export default function ChatApp() {
           else{
             return setDocs(prev=>({...prev,version1:received.payload.version}))
           }
-          console.log('checking document data2 ', docs);
+          // console.log('checking document data2 ', docs);
         }
         if(received.type=='CHAT'){
           setGroupMessages(prev => [...prev, {
@@ -215,36 +215,42 @@ export default function ChatApp() {
         }]);
       }  
       else{
-        // console.log('checking document data in online users ', received);
+        console.log('checking if i can receive caret position ', received);
         // if(received.username!==username){
           return setOnlineUsers(received);
           // }
-        
       }
       });
       // console.log('Joined room:', roomId);
     }
     return ()=>{
-      // console.log("leaving room bye bye!")
+      console.log("leaving room bye bye!")
       leaveRoom()
-    //  console.log("leaving room bye bye 2!")
+      console.log("leaving room bye bye 2!")
     };
-    }, [joinedRoom, stompClient]);
+    }, [joinedRoom, stompClient?.connected]);
 
   const leaveRoom = () => {
     // console.log('Leaving room:', joinedRoom);
-    const leaving=({
+    GroupSubRef.current?.unsubscribe();
+    GroupSubRef.current = null;
+    if (stompClient && stompClient?.connected) {
+      const leaving=({
       username: username,
       roomId:joinedRoom,
       state:'UNSUBSCRIBE'
     })
-    stompClient.publish({
+    try{
+      stompClient.publish({
       destination:'/chat/unsubscribe',
       body:JSON.stringify(leaving),
     })
-    // console.log('leaved room:', joinedRoom);
-    GroupSubRef.current?.unsubscribe();
-    GroupSubRef.current = null;
+    }
+    catch(err){
+      alert("error in unsubscribing ",err)
+    }
+  }
+    console.log('leaved room:', joinedRoom);
     setJoinedRoom('');
     setGroupMessages([]);
     setRoomId('');

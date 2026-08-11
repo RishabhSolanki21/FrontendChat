@@ -34,12 +34,13 @@ export default function Collab({roomId,username,
     textarearef.current?.setSelectionRange(caretPos1.current,caretPos2.current)
     const handleProject=(e)=>{
         // console.log("e.target.selectionStart ",textarearef.current.selectionStart)
-        console.log("callign handle project method ",docs )
+        // console.log("callign handle project method ",docs )
         caretPos1.current=textarearef.current.selectionStart;
         caretPos2.current=textarearef.current.selectionEnd;
         // console.log("checking caret pos in handle project ",caretPos1.current,caretPos2.current)
         // const oldPosition=docs?.PosStart
-        console.log("callign handle project method22 ",docs )
+        // console.log("callign handle project method22 ",docs )
+        console.log("checking caret pos in handle project ",caretPos1.current,caretPos2.current)
         const textarea=checkTextChange(docs?.content??"" ,e.target.value); 
         setDocs(prev=>({...prev,
             content:prev.content.slice(0,textarea.start)+textarea.newText+prev.content.slice(textarea.start+textarea.delete_count),
@@ -65,8 +66,8 @@ export default function Collab({roomId,username,
             start:textarea.start,
             version:docs?.version,
         })
-        console.log("old caret position  ", caretPos1.current, caretPos2.current)
-        console.log("setdocs ", docs??"null")
+        // console.log("old caret position  ", caretPos1.current, caretPos2.current)
+        // console.log("setdocs ", docs??"null")
     }
     function checkTextChange(oldText,newText1){
         let start=0;
@@ -92,7 +93,7 @@ export default function Collab({roomId,username,
         // console.log("calling handle caret method")
         caretPos1.current=textarearef.current.selectionStart;
         caretPos2.current=textarearef.current.selectionEnd;
-        // console.log("checking caret pos in handle Caret ",caretPos1.current,caretPos2.current)
+        console.log("checking caret pos in handle Caret ",caretPos1.current,caretPos2.current)
         sendCaret({
             PosStart:caretPos1.current,
             PosEnd:caretPos2.current
@@ -147,7 +148,6 @@ export default function Collab({roomId,username,
                     // onKeyUp={(e)=>{handleCaret(e)}}
                     // onClick={(e)=>{handleCaret(e)}}
                     onSelect={(e)=>{handleCaret(e)}}>
-                        {/* {docs?.content} */}
                     </textarea>
                     {Object.entries(onlineUsers??[]).map(([onlineuser,users])=>{
                         // console.log("qwertyu ",users)
@@ -165,9 +165,7 @@ export default function Collab({roomId,username,
                               backgroundColor:`hsl(${12},70%,50%)`
                         }}>|</div>)}</div>
                     })
-                                
-            }
-
+                    }
                 </div>)}
          </div>
      </div>)

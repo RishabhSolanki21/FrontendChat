@@ -19,7 +19,7 @@ export default function Collab({roomId,username,
         const newCaret={}
         // console.log("marker ref ",markerRef)
         Object.entries(markerRef.current).forEach(([name,mref])=>{
-            const rect=mref?.getBoundingClientRect()
+        const rect=mref?.getBoundingClientRect()
         const contRect=containerRef.current?.closest('.editor-container')?.getBoundingClientRect()
         // console.log("rect ",rect??"null")
         newCaret[name]=({
@@ -118,55 +118,60 @@ export default function Collab({roomId,username,
 
     return (<div className="collab-wrapper">
         <div className="header">{!joinedRoom?(
-        <div className="input-buttons"><input type="text" placeholder="create a new document"
-        value={roomId}
-        onChange={(e) => setRoomId(e.target.value)}/>
-        <button onClick={joinRoom}>create</button> 
-        <button onClick={joinRoom}>join</button>
-        </div>):(
-        <div className="collab-header">
-                 <div className="tracking-container"> { onlineUsers!=null ?(
-                Object.entries(onlineUsers)?.map(([username,users])=>(
-                    <div className="online-users" key={username}>{users.username}</div>
-                ))
-            ):(
-                <div>no users</div>
-            )}</div> 
-             <div className="save-container"><button className="save-button"
-            onClick={saveFile}
-            >save</button></div>
-            </div>
-        )}</div>
-        <div>
-            {joinedRoom&&(
-                <div  className="editor-container" ref={containerRef}>
-                
-                    <textarea className="editor"
-                    name="textarea" value={docs?.content ??""} id="1" ref={textarearef} onChange={(e)=>{handleProject(e)}}
+            <div className="input-buttons"><input type="text" placeholder="create a new document"
+            value={roomId}
+            onChange={(e) => setRoomId(e.target.value)}/>
+            <button onClick={joinRoom}>create</button> 
+            <button onClick={joinRoom}>join</button>
+            </div>):(
+                <div className="collab-header">
+                    <div className="tracking-container"> 
+                        { onlineUsers!=null ?(Object.entries(onlineUsers)?.map(([username,users])=>(
+                            <div className="online-users" key={username}>{users.username}</div>
+                        ))
+                    ):(
+                    <div>no users</div>
+                    )}</div> 
+                    <div className="save-container">
+                        <button className="save-button"onClick={saveFile}>
+                            save</button>
+                            </div>
+                            </div>
+                        )}
+                        </div>
+                        <div>
+                            {joinedRoom&&(
+                                <div  className="editor-container" ref={containerRef}>
+                                    <textarea className="editor"
+                                    name="textarea" value={docs?.content ??""} id="1" ref={textarearef} onChange={(e)=>{handleProject(e)}}
                     // onBeforeInput={(e)=>{console.log("======================",e)}}
                     // onKeyDown={(e)=>{handleCaret(e)}}
                     // onKeyUp={(e)=>{handleCaret(e)}}
                     // onClick={(e)=>{handleCaret(e)}}
-                    onSelect={(e)=>{handleCaret(e)}}>
-                    </textarea>
-                    {Object.entries(onlineUsers??[]).map(([onlineuser,users])=>{
-                        // console.log("qwertyu ",users)
-                      return  <div key={onlineuser}>
+                                    onSelect={(e)=>{handleCaret(e)}}>
+    
+                                    </textarea>
+                                    {Object.entries(onlineUsers??[]).map(([onlineuser,users])=>{
+                                        return  <div key={onlineuser}>
                             {/* <div className="mirror">{(docs?.content??"").slice(0,users?.caret?.PosStart??0)}<span className="rect" 
                             ref={el=>{markerRef.current[onlineuser]=el}}id="caret">
                                     </span>{(docs?.content??"").slice(users?.caret?.PosStart??0)}
                                 </div> */}
-                                <div className="selection-area">{(docs?.content??"").slice(0,users?.caret?.PosStart??0)}<span className="selection-rect" ref={el=>{markerRef.current[onlineuser]=el}}>
-                                   {(docs?.content??"").slice(users?.caret?.PosStart??0,users?.caret?.PosEnd??0)}
-                                    </span>{(docs?.content??"").slice(users?.caret?.PosEnd??0)}
-                                </div>
-                        {onlineuser!==username&&remotecaret[onlineuser]?.x!==0&&remotecaret[onlineuser]?.y!==0&&(
-                            <div className="caret1" style={{left:`${remotecaret[onlineuser]?.x}px`,top:`${remotecaret[onlineuser]?.y}px`,
-                              backgroundColor:`hsl(${12},70%,50%)`
-                        }}>|</div>)}</div>
-                    })
-                    }
-                </div>)}
-         </div>
-     </div>)
-}
+                                <div className="selection-area">
+                                    {(docs?.content??"").slice(0,users?.caret?.PosStart??0)}
+                                    <span className="selection-rect" ref={el=>{markerRef.current[onlineuser]=el}}>
+                                        {(docs?.content??"").slice(users?.caret?.PosStart??0,users?.caret?.PosEnd??0)}
+                                        </span>{(docs?.content??"").slice(users?.caret?.PosEnd??0)}
+                                        </div>
+                                        {onlineuser!==username&&remotecaret[onlineuser]?.x!==0&&remotecaret[onlineuser]?.y!==0&&(
+                                            <div className="caret1" style={{left:`${remotecaret[onlineuser]?.x}px`,top:`${remotecaret[onlineuser]?.y}px`,
+                                            backgroundColor:`hsl(${12},70%,50%)`
+                                        }}>|</div>
+                                    )}
+                                    </div>
+                                    })
+                                    }
+                                    </div>)}
+                                    </div>
+                                    </div>)
+                                    }
